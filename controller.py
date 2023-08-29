@@ -6,6 +6,32 @@ class Controller:
         self.authenticator = Authenticator()
         self.view = View()
 
+    def user_menu(self):
+        while True:
+            self.view.display_user_menu()
+            choice = self.view.get_user_choice()
+
+            if choice == '1':
+                # Implement List Saved Credentials
+                pass
+            elif choice == '2':
+                # Implement Search Saved Credentials
+                pass
+            elif choice == '3':
+                # Implement Create New/Modify Credential
+                pass
+            elif choice == '4':
+                # Implement Delete Credential
+                pass
+            elif choice == '5':
+                self.view.display_message("Logged out successfully.")
+                break
+            elif choice == '6':
+                self.view.display_message("Goodbye!")
+                exit()
+            else:
+                self.view.display_message("Invalid choice. Please select a valid option.")
+
     def run(self):
         while True:
             self.view.display_menu()
@@ -17,8 +43,7 @@ class Controller:
 
                 if self.authenticator.validate_user(username, password):
                     self.view.display_message("Login successful!")
-                    # Rest of your program goes here
-                    self.view.display_message("Access granted. You can now use the application.")
+                    self.user_menu()  # User menu is displayed after successful login
                 else:
                     self.view.display_message("Invalid username or password. Please try again.")
             elif choice == '2':

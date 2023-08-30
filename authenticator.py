@@ -9,9 +9,14 @@ class Authenticator:
     def load_credentials(self):
         try:
             with open("credentials.json", "r") as file:
-                return json.load(file)
-        except (FileNotFoundError, json.JSONDecodeError):
-            return {}
+              return json.load(file)
+        except FileNotFoundError:
+          print("Credentials file not found. Returning to main menu.")
+          return {}
+        except json.JSONDecodeError as e:
+         print(f"Error decoding credentials file: {e}. Returning to main menu.")
+        return {}
+
 
     def save_credentials(self):
         credentials_to_save = {username: password.decode('utf-8') for username, password in self.credentials.items()}

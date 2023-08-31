@@ -1,16 +1,21 @@
+# Import necessary classes from other modules
 from authenticator import Authenticator
 from view import View
 from pwdgenerator import PwdGenerator
 from credcontroller import CredController
 
+# Define the Controller class
 class Controller:
     def __init__(self):
+        # Initialize the Authenticator, View, and CredController objects
         self.authenticator = Authenticator()
         self.view = View()
-        self.cred_controller = CredController(self.authenticator.logged_in_user)
+        self.cred_controller = None
 
+    # Method to run the main controller loop
     def run(self):
         while True:
+            # Display the main menu options
             self.view.display_menu()
             choice = input("Enter your choice: ")
 
@@ -29,6 +34,7 @@ class Controller:
                     continue  # Return to the main menu
 
                 if self.authenticator.validate_user(username, password):
+                    self.cred_controller = CredController(username)  # Initialize after successful login
                     self.view.display_message("Login successful!")
                     self.user_menu()  # User menu is displayed after successful login
                 else:
@@ -44,7 +50,7 @@ class Controller:
             else:
                 self.view.display_message("Invalid choice. Please select a valid option.")
 
-                
+    # Method to display the user menu and handle user choices
     def user_menu(self):
         while True:
             self.view.display_user_menu()
@@ -74,22 +80,30 @@ class Controller:
             else:
                 self.view.display_message("Invalid choice. Please select a valid option.")
 
+    # Method to list saved credentials
     def list_saved_credentials(self):
         if not self.authenticator.credentials:
             self.view.display_message("No credentials found. Please create a user or select another option.")
             return
 
         for cred in self.cred_controller.credentials:
+            self.view.display_message("-" * 20)
             self.view.display_message(f"Username: {cred['userName']}")
             self.view.display_message(f"Credential Name: {cred['credName']}")
             self.view.display_message(f"Credential Context: {cred['credContext']}")
             self.view.display_message(f"Credential Password: {cred['credPwd']}")
             self.view.display_message("-" * 20)
 
+            # Display a message to hit "Enter" to continue
+            input("Press Enter to continue...")
+
+
+    # Method to search saved credentials
     def search_saved_credentials(self):
         # Implement the logic to search saved credentials using the CredController
         pass
 
+    # Method to create a new credential
     def create_new_credential(self):
         user_name = self.authenticator.logged_in_user
         cred_name = input("Enter the Credential Name: ")
@@ -139,10 +153,12 @@ class Controller:
         self.cred_controller.add_credential(new_credential) 
         self.view.display_message("Credential created successfully.")
         
+    # Method to modify a credential
     def modify_credential(self):
         # Implement the logic to modify a credential using the CredController
         pass
 
+    # Method to delete a credential
     def delete_credential(self):
         # Implement the logic to delete a credential using the CredController
         pass

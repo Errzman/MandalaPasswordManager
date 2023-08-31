@@ -3,19 +3,20 @@ import json
 
 class Authenticator:
     def __init__(self):
+        self.logged_in_user = None  # Initialize logged_in_user to None
         self.credentials = self.load_credentials()
         self.encryptor = Encryptor()
 
     def load_credentials(self):
         try:
             with open("credentials.json", "r") as file:
-              return json.load(file)
+                return json.load(file)
         except FileNotFoundError:
-          print("Credentials file not found. Returning to main menu.")
-          return {}
+            print("Credentials file not found. Returning to main menu.")
+            return {}
         except json.JSONDecodeError as e:
-         print(f"Error decoding credentials file: {e}. Returning to main menu.")
-        return {}
+            print(f"Error decoding credentials file: {e}. Returning to main menu.")
+            return {}
 
 
     def save_credentials(self):
@@ -30,4 +31,7 @@ class Authenticator:
 
     def validate_user(self, username, password):
         hashed_password = self.credentials.get(username)
-        return hashed_password and self.encryptor.check_password(password, hashed_password)
+        if hashed_password and self.encryptor.check_password(password, hashed_password):
+            self.logged_in_user = username  # Set logged_in_user on successful login
+            return True
+        return False

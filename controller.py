@@ -1,10 +1,13 @@
 from authenticator import Authenticator
 from view import View
+from pwdgenerator import PwdGenerator
+from credcontroller import CredController
 
 class Controller:
     def __init__(self):
         self.authenticator = Authenticator()
         self.view = View()
+        self.cred_controller = CredController(self.authenticator.logged_in_user)
 
     def run(self):
         while True:
@@ -21,9 +24,9 @@ class Controller:
                 password = input("Enter your password: ")
 
                 # Check if username and password are not empty
-            if not username or not password:
-                self.view.display_message("Username and password cannot be empty. Please try again.")
-                continue  # Return to the main menu
+                if not username or not password:
+                    self.view.display_message("Username and password cannot be empty. Please try again.")
+                    continue  # Return to the main menu
 
                 if self.authenticator.validate_user(username, password):
                     self.view.display_message("Login successful!")
@@ -106,7 +109,13 @@ class Controller:
         use_uppercase = input("Include Uppercase letters (Y/N)? ").strip().lower() == 'y'
         use_lowercase = input("Include Lowercase letters (Y/N)? ").strip().lower() == 'y'
         use_numbers = input("Include Numbers (Y/N)? ").strip().lower() == 'y'
-        use_symbols = input("Include Symbols (Y/N)? ").strip().lower() == 'y'
+        
+        # Prompt the user to enter symbols
+        use_symbols_input = input("Include Symbols (Y/N)? ").strip().lower()
+        if use_symbols_input == 'y':
+            symbols = input("Enter the symbols to include: ")
+        else:
+            symbols = ""
 
         # Generate a password using the PwdGenerator
         password_generator = PwdGenerator(
@@ -114,7 +123,7 @@ class Controller:
             use_uppercase=use_uppercase,
             use_lowercase=use_lowercase,
             use_numbers=use_numbers,
-            use_symbols=use_symbols
+            use_symbols=symbols
         )
         cred_pwd = password_generator.generate_password()
 
@@ -127,7 +136,7 @@ class Controller:
         }
 
         # Add the new credential using the CredController
-        self.cred_controller.add_credential(new_credential)
+        self.cred_controller.add_credential(new_credential) 
         self.view.display_message("Credential created successfully.")
         
     def modify_credential(self):

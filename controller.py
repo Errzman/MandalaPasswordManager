@@ -15,40 +15,44 @@ class Controller:
     # Method to run the main controller loop
     def run(self):
         while True:
-            # Display the main menu options
             self.view.display_menu()
             choice = input("Enter your choice: ")
 
             if choice == '1':
-                # Check if the credentials file exists
-                if not self.authenticator.credentials:
-                    self.view.display_message("No credentials found. Please create a user or select another option.")
-                    continue  # Return to the main menu
-
-                username = input("Enter your username: ")
-                password = input("Enter your password: ")
-
-                # Check if username and password are not empty
-                if not username or not password:
-                    self.view.display_message("Username and password cannot be empty. Please try again.")
-                    continue  # Return to the main menu
-
-                if self.authenticator.validate_user(username, password):
-                    self.cred_controller = CredController(username)  # Initialize after successful login
-                    self.view.display_message("Login successful!")
-                    self.user_menu()  # User menu is displayed after successful login
-                else:
-                    self.view.display_message("Invalid username or password. Please try again.")
+                self.login_menu()
             elif choice == '2':
-                username = input("Enter the username: ")
-                password = input("Enter the new password: ")
-                self.authenticator.create_or_update_user(username, password)
-                self.view.display_message("User created/updated successfully.")
+                self.create_update_user_menu()
             elif choice == '3':
                 self.view.display_message("Goodbye!")
                 break
             else:
                 self.view.display_message("Invalid choice. Please select a valid option.")
+
+    def login_menu(self):
+        if not self.authenticator.credentials:
+            self.view.display_message("No credentials found. Please create a user or select another option.")
+            return
+
+        username = input("Enter your username: ")
+        password = input("Enter your password: ")
+
+        if not username or not password:
+            self.view.display_message("Username and password cannot be empty. Please try again.")
+            return
+
+        if self.authenticator.validate_user(username, password):
+            self.cred_controller = CredController(username)
+            self.view.display_message("Login successful!")
+            self.user_menu()
+        else:
+            self.view.display_message("Invalid username or password. Please try again.")
+
+    def create_update_user_menu(self):
+        username = input("Enter the username: ")
+        password = input("Enter the new password: ")
+        self.authenticator.create_or_update_user(username, password)
+        self.view.display_message("User created/updated successfully.")
+
 
     # Method to display the user menu and handle user choices
     def user_menu(self):

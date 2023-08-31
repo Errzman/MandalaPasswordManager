@@ -8,5 +8,8 @@ class Encryptor:
         return hashed_password
 
     def check_password(self, password, hashed_password):
+        # Encode the provided password before checking
+        encoded_password = password.encode('utf-8')
+        hash_encoded_password = hashed_password.encode('utf-8')
         # Check if the provided password matches the hashed password
-        return bcrypt.checkpw(password.encode('utf-8'), hashed_password)
+        return bcrypt.checkpw(encoded_password, hash_encoded_password)

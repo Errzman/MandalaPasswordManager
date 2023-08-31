@@ -10,16 +10,21 @@ class Controller:
         while True:
             self.view.display_menu()
             choice = input("Enter your choice: ")
-    
+
             if choice == '1':
                 # Check if the credentials file exists
                 if not self.authenticator.credentials:
                     self.view.display_message("No credentials found. Please create a user or select another option.")
                     continue  # Return to the main menu
-                
+
                 username = input("Enter your username: ")
                 password = input("Enter your password: ")
-    
+
+                # Check if username and password are not empty
+            if not username or not password:
+                self.view.display_message("Username and password cannot be empty. Please try again.")
+                continue  # Return to the main menu
+
                 if self.authenticator.validate_user(username, password):
                     self.view.display_message("Login successful!")
                     self.user_menu()  # User menu is displayed after successful login
@@ -52,12 +57,15 @@ class Controller:
                 # Implement Create New/Modify Credential
                 pass
             elif choice == '4':
-                # Implement Delete Credential
+                # Implement Create New/Modify Credential
                 pass
             elif choice == '5':
+                # Implement Delete Credential
+                pass
+            elif choice == '6':
                 self.view.display_message("Logged out successfully.")
                 break
-            elif choice == '6':
+            elif choice == '7':
                 self.view.display_message("Goodbye!")
                 exit()
             else:

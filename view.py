@@ -12,10 +12,11 @@ class View:
         print("\nUser Menu:")
         print("1. List Saved Credentials")
         print("2. Search Saved Credentials")
-        print("3. Create New/Modify Credential")
-        print("4. Delete Credential")
-        print("5. Logout")
-        print("6. Quit")
+        print("3. Create New Credential")
+        print("4. Modify Credential")
+        print("5. Delete Credential")
+        print("6. Logout")
+        print("7. Quit")
 
     def get_user_choice(self):
         return input("Enter your choice: ")

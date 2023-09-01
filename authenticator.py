@@ -16,13 +16,18 @@ class Authenticator:
             return {}
 
     def save_credentials(self):
-        credentials_to_save = {username: password.decode('utf-8') for username, password in self.credentials.items()}
+        credentials_to_save = {}
+        for username, password in self.credentials.items():
+            if isinstance(password, bytes):
+                password = password.decode('utf-8')
+            credentials_to_save[username] = password
+
         with open("credentials.json", "w") as file:
             json.dump(credentials_to_save, file, indent=4)
 
     def create_or_update_user(self, username, password):
         hashed_password = self.encryptor.hash_password(password)
-        self.credentials[username] = hashed_password
+        self.credentials[username] = hashed_password  # Store as bytes
         self.save_credentials()
 
     def validate_user(self, username, password):

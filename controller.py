@@ -3,6 +3,7 @@ from authenticator import Authenticator
 from view import View
 from pwdgenerator import PwdGenerator
 from credcontroller import CredController
+import getpass
 
 # Define the Controller class
 class Controller:
@@ -34,7 +35,7 @@ class Controller:
             return
 
         username = input("Enter your username: ")
-        password = input("Enter your password: ")
+        password = getpass.getpass("Enter your password: ")
 
         if not username or not password:
             self.view.display_message("Username and password cannot be empty. Please try again.")
@@ -49,9 +50,23 @@ class Controller:
 
     def create_update_user_menu(self):
         username = input("Enter the username: ")
-        password = input("Enter the new password: ")
-        self.authenticator.create_or_update_user(username, password)
-        self.view.display_message("User created/updated successfully.")
+
+        if username in self.authenticator.credentials:
+            existing_password = getpass.getpass("Enter the existing password: ")
+            if not self.authenticator.validate_user(username, existing_password):
+                print("Incorrect existing password. Aborting operation.")
+                return
+
+        while True:
+            new_password1 = getpass.getpass("Enter the new password: ")
+            new_password2 = getpass.getpass("Confirm the new password: ")
+
+            if new_password1 == new_password2:
+                self.authenticator.create_or_update_user(username, new_password1)
+                self.view.display_message("User created/updated successfully.")
+                break
+            else:
+                print("Passwords do not match. Please try again.")
 
 
     # Method to display the user menu and handle user choices
@@ -86,14 +101,14 @@ class Controller:
 
     # Method to list saved credentials
     def list_saved_credentials(self):
-        if not self.authenticator.credentials:
-            self.view.display_message("No credentials found. Please create a user or select another option.")
+        if not self.cred_controller.credentials:
+            self.view.display_message("No stored credentials found.")
             return
 
         for cred in self.cred_controller.credentials:
             self.view.display_message("-" * 20)
             self.view.display_message(f"Username: {cred['userName']}")
-            self.view.display_message(f"Credential Name: {cred['credName']}")
+            self.view.display_message(f"Credential UserName: {cred['credName']}")
             self.view.display_message(f"Credential Context: {cred['credContext']}")
             self.view.display_message(f"Credential Password: {cred['credPwd']}")
             self.view.display_message("-" * 20)
@@ -110,8 +125,8 @@ class Controller:
     # Method to create a new credential
     def create_new_credential(self):
         user_name = self.authenticator.logged_in_user
-        cred_name = input("Enter the Credential Name: ")
-        cred_context = input("Enter the Credential Context: ")
+        cred_name = input("Enter the Credential UserName: ")
+        cred_context = input("Enter the Credential Context (Eg. Application or Website): ")
 
         # Prompt the user for password length
         while True:

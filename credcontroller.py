@@ -22,7 +22,17 @@ class CredController:
         self.save_credentials()
 
     def remove_credential(self, username):
-        self.credentials = [cred for cred in self.credentials if cred['userName'] != username]
+        initial_count = len(self.credentials)  # Get the initial count of credentials
+    
+        self.credentials = [cred for cred in self.credentials if cred['credName'] != username]  # Change 'userName' to 'credName'
+    
+        final_count = len(self.credentials)  # Get the final count of credentials after removal
+    
+        if initial_count != final_count:
+            print(f"Credential with 'credName' {username} removed successfully.")
+        else:
+            print(f"No credential with 'credName' {username} found for removal.")
+    
         self.save_credentials()
 
     def modify_credential(self, username, new_credential):
@@ -30,3 +40,4 @@ class CredController:
             if cred['userName'] == username:
                 cred.update(new_credential)
         self.save_credentials()
+

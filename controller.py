@@ -1,4 +1,5 @@
 # Import necessary classes from other modules
+import random
 from authenticator import Authenticator
 from view import View
 from pwdgenerator import PwdGenerator
@@ -79,21 +80,18 @@ class Controller:
                 # List Saved Credentials
                 self.list_saved_credentials()
             elif choice == '2':
-                # Search Saved Credentials
-                self.search_saved_credentials()
-            elif choice == '3':
                 # Create New Credential
                 self.create_new_credential()
-            elif choice == '4':
+            elif choice == '3':
                 # Modify Credential
                 self.modify_credential()
-            elif choice == '5':
+            elif choice == '4':
                 # Delete Credential
                 self.delete_credential()
-            elif choice == '6':
+            elif choice == '5':
                 self.view.display_message("Logged out successfully.")
                 break
-            elif choice == '7':
+            elif choice == '6':
                 self.view.display_message("Goodbye!")
                 exit()
             else:
@@ -105,22 +103,36 @@ class Controller:
             self.view.display_message("No stored credentials found.")
             return
 
-        for cred in self.cred_controller.credentials:
-            self.view.display_message("-" * 20)
-            self.view.display_message(f"Username: {cred['userName']}")
-            self.view.display_message(f"Credential UserName: {cred['credName']}")
-            self.view.display_message(f"Credential Context: {cred['credContext']}")
-            self.view.display_message(f"Credential Password: {cred['credPwd']}")
-            self.view.display_message("-" * 20)
+        # Display the list of existing credentials
+        self.display_existing_credentials()
 
-            # Display a message to hit "Enter" to continue
-            input("Press Enter to continue...")
+        credentials = self.cred_controller.credentials
 
+        while True:
+            self.view.display_message("Enter the number of the credential to display the password (0 to cancel): ")
 
-    # Method to search saved credentials
-    def search_saved_credentials(self):
-        # Implement the logic to search saved credentials using the CredController
-        pass
+            try:
+                choice = int(input())
+                if choice == 0:
+                    return  # Cancel operation
+
+                if 1 <= choice <= len(credentials):
+                    selected_credential = credentials[choice - 1]
+                    old_password = selected_credential.get('oldPwd', "N/A")
+                    current_password = selected_credential['credPwd']
+    
+                    self.view.display_message("-" * 20)
+                    self.view.display_message(f"Old Password: {old_password}")
+                    self.view.display_message(f"Current Password: {current_password}")
+                    self.view.display_message("-" * 20)
+                    self.view.display_message("Press Enter to continue...")
+                    input()  # Wait for user input
+                    return
+                else:
+                    raise ValueError()
+            except ValueError:
+                self.view.display_message("Invalid input. Please enter a valid number or 0 to cancel.")
+
 
     # Method to create a new credential
     def create_new_credential(self):
@@ -160,12 +172,23 @@ class Controller:
         )
         cred_pwd = password_generator.generate_password()
 
+        # Create a dictionary with password generation parameters
+        password_params = {
+            'pwd_length': pwd_length,
+            'use_uppercase': use_uppercase,
+            'use_lowercase': use_lowercase,
+            'use_numbers': use_numbers,
+            'use_symbols': symbols
+        }
+
+
         # Create a new credential dictionary
         new_credential = {
             'userName': user_name,
             'credName': cred_name,
             'credContext': cred_context,
-            'credPwd': cred_pwd
+            'credPwd': cred_pwd,
+            'PwdSettings': password_params
         }
 
         # Add the new credential using the CredController
@@ -174,10 +197,115 @@ class Controller:
         
     # Method to modify a credential
     def modify_credential(self):
-        # Implement the logic to modify a credential using the CredController
-        pass
+        # Generate and display the list of existing credentials
+        self.display_existing_credentials()
+
+        # Access the credentials from the CredController
+        credentials = self.cred_controller.credentials
+
+        # Prompt the user to select a credential by entering the associated number
+        while True:
+            try:
+                choice = int(input("Enter the number of the credential to modify (0 to cancel): "))
+                if choice == 0:
+                    return  # Cancel modification
+                if 1 <= choice <= len(credentials):
+                    selected_credential = credentials[choice - 1]
+                    break
+                else:
+                    raise ValueError()
+            except ValueError:
+                print("Invalid input. Please enter a valid number or 0 to cancel.")
+
+        # Prompt the user whether they want to generate a new password
+        while True:
+            generate_new_password = input("Generate a new password using existing settings (Y/N)? ").strip().lower()
+            if generate_new_password == 'y':
+                # Generate a new password using the existing settings
+                password_generator = PwdGenerator(
+                    pwd_length=selected_credential['PwdSettings']['pwd_length'],
+                    use_uppercase=selected_credential['PwdSettings']['use_uppercase'],
+                    use_lowercase=selected_credential['PwdSettings']['use_lowercase'],
+                    use_numbers=selected_credential['PwdSettings']['use_numbers'],
+                    use_symbols=selected_credential['PwdSettings']['use_symbols']
+                )
+                new_password = password_generator.generate_password()
+                selected_credential['oldPwd'] = selected_credential['credPwd']  # Store the old password
+                selected_credential['credPwd'] = new_password
+                self.view.display_message("New password generated and updated.")
+                break
+            elif generate_new_password == 'n':
+                # Keep the existing password
+                self.view.display_message("Password not changed.")
+                break
+            else:
+                print("Invalid input. Please enter 'Y' for Yes or 'N' for No.")
+
+        # Save the updated credentials list using the CredController
+        self.cred_controller.save_credentials()
+        self.view.display_message("Credential password modified successfully.")
+        self.view.display_message("Please update your password using the following information:")
+        self.view.display_message(f"Old Password:" + selected_credential['oldPwd'])
+        self.view.display_message(f"Current Password: " + selected_credential['credPwd'])
 
     # Method to delete a credential
     def delete_credential(self):
-        # Implement the logic to delete a credential using the CredController
-        pass
+        # Display the list of existing credentials
+        self.display_existing_credentials()
+    
+        credentials = self.cred_controller.credentials
+    
+        while True:
+            try:
+                # Prompt the user to select a credential by entering the associated number
+                choice = int(input("Enter the number of the credential to delete (0 to cancel): "))
+                if choice == 0:
+                    return  # Cancel operation
+    
+                if 1 <= choice <= len(credentials):
+                    selected_credential = credentials[choice - 1]
+    
+                    # Ask for user confirmation
+                    confirmation = input(f"Are you sure you want to delete '{selected_credential['credName']}'? (Y/N): ").strip().lower()
+                    if confirmation == 'y':
+                        # Generate a random 4-digit code
+                        verification_code = str(random.randint(1000, 9999))
+
+                         # Display the verification code to the user
+                        self.view.display_message(f"Verification Code: {verification_code}")
+    
+                        # Prompt the user to enter the verification code
+                        user_code = input(f"Enter the 4-digit verification code to confirm deletion: ")
+    
+                        if user_code == verification_code:
+                            # Delete the selected credential using the CredController
+                            self.cred_controller.remove_credential(selected_credential['credName'])
+                            self.view.display_message("Credential deleted successfully.")
+                            return
+                        else:
+                            self.view.display_message("Incorrect verification code. Deletion canceled.")
+                            return
+                    elif confirmation == 'n':
+                        self.view.display_message("Deletion canceled.")
+                        return
+                    else:
+                        self.view.display_message("Invalid input. Please enter 'Y' for Yes or 'N' for No.")
+                else:
+                    raise ValueError()
+            except ValueError:
+                self.view.display_message("Invalid input. Please enter a valid number or 0 to cancel.")
+
+    
+    # Method to generate and display the list of existing credentials
+    def display_existing_credentials(self):
+        credentials = self.cred_controller.credentials
+
+        # Check if there are any credentials to display
+        if not credentials:
+            self.view.display_message("No credentials found.")
+            return
+
+        # Display the list of credentials to the user
+        self.view.display_message("List of Existing Credentials:")
+        for i, credential in enumerate(credentials, start=1):
+            self.view.display_message(f"{i}. {credential['credName']} ({credential['credContext']})")

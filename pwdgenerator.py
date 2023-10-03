@@ -12,6 +12,8 @@ class PwdGenerator:
     def generate_password(self):
         character_sets = []
 
+        # Checks value of possible options based on user selection and creates  individual list items for each category of character accordingly.
+
         if self.use_uppercase:
             character_sets.append(string.ascii_uppercase)
         if self.use_lowercase:
@@ -21,10 +23,15 @@ class PwdGenerator:
         if self.use_symbols:
             character_sets.append(self.use_symbols)
 
+        # Throw error if no options were chosen
+
         if not character_sets:
             raise ValueError("At least one character set must be selected")
 
         password = []
+
+        # Populates list by first selecting a charater type at random, then randomly choosing a charater from 
+        # that character type in order to ensure that each type of character has an equal chance at being selected
 
         for _ in range(self.pwd_length):
             char_set = random.choice(character_sets)

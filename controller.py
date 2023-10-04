@@ -29,6 +29,10 @@ class Controller:
                 break
             else:
                 self.view.display_message("Invalid choice. Please select a valid option.")
+                
+    def validate_password(self, password):
+        # Check if password meets the specified criteria
+        return len(password) >= 12 and any(c.isdigit() for c in password) and any(c.isupper() for c in password) and any(c.islower() for c in password) and any(c in r"!@#$%^&*()-_=+[]{}|;:'\",.<>/?`~" for c in password)
 
     def login_menu(self):
         if not self.authenticator.credentials:
@@ -42,12 +46,15 @@ class Controller:
             self.view.display_message("Username and password cannot be empty. Please try again.")
             return
 
-        if self.authenticator.validate_user(username, password):
-            self.cred_controller = CredController(username)
-            self.view.display_message("Login successful!")
-            self.user_menu()
+        if self.validate_password(password):
+            if self.authenticator.validate_user(username, password):
+                self.cred_controller = CredController(username)
+                self.view.display_message("Login successful!")
+                self.user_menu()
+            else:
+                self.view.display_message("Invalid username or password. Please try again.")
         else:
-            self.view.display_message("Invalid username or password. Please try again.")
+            self.view.display_message("Invalid password. Please ensure it is at least 12 characters long and includes at least one number, uppercase letter, and symbol.")
 
     def create_update_user_menu(self):
         username = input("Enter the username: ")
@@ -59,15 +66,15 @@ class Controller:
                 return
 
         while True:
-            new_password1 = getpass.getpass("Enter the new password: ")
+            new_password1 = getpass.getpass("Enter the new password. It must be at least 12 characters in length, and contain a Uppercase Letter, Lowercase Letter, Number and Symbol: ")
             new_password2 = getpass.getpass("Confirm the new password: ")
 
-            if new_password1 == new_password2:
+            if new_password1 == new_password2 and self.validate_password(new_password1):
                 self.authenticator.create_or_update_user(username, new_password1)
                 self.view.display_message("User created/updated successfully.")
                 break
             else:
-                print("Passwords do not match. Please try again.")
+                print("Invalid password. Passwords do not match or do not meet the criteria. Please try again.")
 
 
     # Method to display the user menu and handle user choices

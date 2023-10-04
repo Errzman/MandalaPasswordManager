@@ -1,9 +1,11 @@
 class View:
     def display_menu(self):
+        print("Reminder: It's recommended to create a backup of your data regularly.")
         print("Main Menu:")
         print("1. Login")
         print("2. Create/Update User")
-        print("3. Quit")
+        print("3. Create Backup")
+        print("4. Quit")
 
     def display_message(self, message):
         print(message)

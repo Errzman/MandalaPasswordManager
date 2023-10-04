@@ -5,14 +5,22 @@ from view import View
 from pwdgenerator import PwdGenerator
 from credcontroller import CredController
 import getpass
+import os
+import shutil
 
 # Define the Controller class
 class Controller:
     def __init__(self):
         # Initialize the Authenticator, View, and CredController objects
+        
         self.authenticator = Authenticator()
         self.view = View()
         self.cred_controller = None
+        
+        # Check if a backup folder exists, if not, create one
+        backup_folder = "backup"
+        if not os.path.exists(backup_folder):
+            os.makedirs(backup_folder)
 
     # Method to run the main controller loop
     def run(self):
@@ -25,11 +33,13 @@ class Controller:
             elif choice == '2':
                 self.create_update_user_menu()
             elif choice == '3':
+                self.create_manual_backup()
+            elif choice == '4':
                 self.view.display_message("Goodbye!")
                 break
             else:
                 self.view.display_message("Invalid choice. Please select a valid option.")
-                
+
     def validate_password(self, password):
         # Check if password meets the specified criteria
         return len(password) >= 12 and any(c.isdigit() for c in password) and any(c.isupper() for c in password) and any(c.islower() for c in password) and any(c in r"!@#$%^&*()-_=+[]{}|;:'\",.<>/?`~" for c in password)
@@ -76,6 +86,31 @@ class Controller:
             else:
                 print("Invalid password. Passwords do not match or do not meet the criteria. Please try again.")
 
+    def create_manual_backup(self):
+        backup_folder = "manual_backup"
+        
+        if os.path.exists(backup_folder):
+            # Backup folder already exists
+            user_input = input("An existing backup is already present. Do you want to replace it? (Y/N): ").strip().lower()
+            
+            if user_input == 'y':
+                # Delete the existing backup folder
+                shutil.rmtree(backup_folder)
+                os.makedirs(backup_folder)
+            else:
+                # User chose not to replace the existing backup
+                self.view.display_message("Backup creation canceled.")
+                return
+        else:
+            # Backup folder doesn't exist, create it
+            os.makedirs(backup_folder)
+
+        # Copy all JSON files to the backup folder
+        for file in os.listdir():
+            if file.endswith(".json"):
+                shutil.copy(file, os.path.join(backup_folder, file))
+
+        self.view.display_message("Manual backup created successfully in 'manual_backup' folder. To use the backedup data, delete all JSON files in main directory and replace them with those in the manual_backup directory.")
 
     # Method to display the user menu and handle user choices
     def user_menu(self):

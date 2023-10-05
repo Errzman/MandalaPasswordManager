@@ -17,10 +17,6 @@ class Controller:
         self.view = View()
         self.cred_controller = None
         
-        # Check if a backup folder exists, if not, create one
-        backup_folder = "backup"
-        if not os.path.exists(backup_folder):
-            os.makedirs(backup_folder)
 
     # Method to run the main controller loop
     def run(self):
